@@ -1,4 +1,5 @@
-(ns lambda.subs)
+(ns lambda.subs
+  (:require [lambda.terms :refer :all]))
 
 (defn substitute [variable substitution term]
   (case (:type term)

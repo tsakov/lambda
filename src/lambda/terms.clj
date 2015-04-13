@@ -1,5 +1,5 @@
 (ns lambda.terms
-  (:require [clojure.set :refer union]))
+  (:require [clojure.set :refer [union]]))
 
 (defn make-variable [var-name]
   {:type :variable
