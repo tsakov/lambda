@@ -14,3 +14,16 @@
           2 (make-application (parse-term a) (parse-term b))
           3 (make-abstraction b (parse-term c))
           nil))))
+
+(defn stringify-term [term]
+  (case (:type term)
+    :variable (str (:name term))
+    :application (format "(%s %s)"
+                   (stringify-term (:func term))
+                   (stringify-term (:arg term)))
+    :abstraction (format "(lambda %s %s)"
+                   (:var term)
+                   (stringify-term (:body term)))))
+
+(defn print-term [term]
+  (println (stringify-term term)))

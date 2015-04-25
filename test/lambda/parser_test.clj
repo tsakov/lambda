@@ -37,3 +37,15 @@
                (make-application
                  (make-variable 'x)
                  (make-variable 'y))))))))
+
+(deftest stringify-term-test
+  (testing "stringify-term"
+    (let [terms ["x"
+                 "(x y)"
+                 "(lambda x y)"
+                 "(x (y z))"
+                 "((x y) z)"
+                 "(lambda x (lambda y (x y)))"]]
+      (doseq [term terms]
+        (is (= term
+               (stringify-term (parse-term term))))))))
