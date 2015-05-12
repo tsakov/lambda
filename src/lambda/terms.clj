@@ -17,7 +17,7 @@
 
 (defn free-vars [term]
   (case (:type term)
-    :variable #{(:var term)}
+    :variable #{(:name term)}
     :application (union (free-vars (:func term))
                         (free-vars (:arg term)))
     :abstraction (disj (free-vars (:body term))
@@ -26,9 +26,9 @@
 (defn bound-vars [term]
   (case (:type term)
     :variable #{}
-    :application (union (free-vars (:func term))
-                        (free-vars (:arg term)))
-    :abstraction (conj (free-vars (:body term))
+    :application (union (bound-vars (:func term))
+                        (bound-vars (:arg term)))
+    :abstraction (conj (bound-vars (:body term))
                        (:var term))))
 
 (defn vars [term]
