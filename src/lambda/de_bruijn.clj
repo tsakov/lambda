@@ -105,3 +105,30 @@
                       (index->name 0 (first context) (:body term))
                       (rest context)
                       (inc level))))))
+
+(defn shift
+  ([term]
+   (shift term 1))
+  ([term offset]
+   (shift term offset 0))
+  ([term offset start]
+   (case (:type term)
+     :variable (if (< (:index term) start)
+                   term
+                   (db-make-variable (+ (:index term) offset)))
+     :application (db-make-application
+                    (shift (:func term) offset start)
+                    (shift (:arg term) offset start))
+     :abstraction (db-make-abstraction
+                    (shift (:body term) offset (inc start))))))
+
+(defn db-subs [ind substitution term]
+  (case (:type term)
+    :variable (if (= ind (:index term))
+                  substitution
+                  term)
+    :application (db-make-application
+                   (db-subs ind substitution (:func term))
+                   (db-subs ind substitution (:arg term)))
+    :abstraction (db-make-abstraction
+                   (db-subs (inc ind) (shift substitution) (:body term)))))

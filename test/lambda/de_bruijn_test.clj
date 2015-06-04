@@ -35,3 +35,18 @@
     (is (= "(lambda a (lambda b x3))" (add-names-parse "(lambda (lambda 5))")))
     (is (= "(lambda a (lambda b (lambda c ((a c) (b c)))))" (add-names-parse "(lambda (lambda (lambda ((2 0) (1 0)))))")))
     (is (= "(lambda a ((lambda b (b (lambda c c))) (lambda b (a b))))" (add-names-parse "(lambda ((lambda (0 (lambda 0))) (lambda (1 0))))" )))))
+
+(defn db-subs-parse [ind substitution term]
+  (->> [substitution term]
+       (map  db-parse-term)
+       (apply db-subs ind)
+       db-stringify-term))
+
+(deftest db-subs-test
+  (testing "db-subs"
+    (is (= "(((2 0) (lambda ((0 (3 1)) 3))) 2)"
+           (db-subs-parse 0 "(2 0)" "((0 (lambda ((0 1) 3))) 2)")))
+    (is (= "(lambda ((3 (lambda (5 0))) (lambda (0 (lambda (6 0))))))"
+           (db-subs-parse 0 "(lambda (4 0))" "(lambda ((3 1) (lambda (0 2))))")))
+    (is (= "((2 (lambda ((0 1) 3))) (lambda ((0 (3 (lambda ((0 2) 4)))) (lambda ((0 1) (4 (lambda ((0 3) 5))))))))"
+           (db-subs-parse 0 "(2 (lambda ((0 1) 3)))" "(0 (lambda ((0 1) (lambda ((0 1) 2)))))")))))
