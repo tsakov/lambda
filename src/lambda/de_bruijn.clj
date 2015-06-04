@@ -1,5 +1,6 @@
 (ns lambda.de-bruijn
-  (:require [lambda.terms :refer :all]))
+  (:require [clojure.core.match :refer [match]]
+            [lambda.terms :refer :all]))
 
 (defn db-make-variable [ind]
   {:type :variable
@@ -15,14 +16,12 @@
    :arg argument})
 
 (defn db-parse-term [input]
-  (cond
-    (string? input) (db-parse-term (read-string input))
-    (number? input) (db-make-variable input)
-    (list? input)
-      (let [[a b] input]
-        (if (= a 'lambda)
-            (db-make-abstraction (db-parse-term b))
-            (db-make-application (db-parse-term a) (db-parse-term b))))))
+  (if (string? input)
+      (db-parse-term (read-string input))
+      (match input
+        (x :guard number?) (db-make-variable x)
+        (['lambda body] :seq) (db-make-abstraction (db-parse-term body))
+        ([func arg] :seq) (db-make-application (db-parse-term func) (db-parse-term arg)))))
 
 (defn db-stringify-term [term]
   (case (:type term)
@@ -42,7 +41,7 @@
 (defn get-name [ind context]
   (nth context ind))
 
-(defn add-index
+(defn name->index
   "Substitute variable with ind in term."
   [variable ind term]
   (case (:type term)
@@ -50,10 +49,10 @@
                   (db-make-variable ind)
                   term)
     :application (db-make-application
-                   (add-index variable ind (:func term))
-                   (add-index variable ind (:arg term)))
-    :abstraction (if (not= (:name variable) (:var term))
-                     (make-abstraction (:var term) (add-index variable  (inc ind) (:body term)))
+                   (name->index variable ind (:func term))
+                   (name->index variable ind (:arg term)))
+    :abstraction (if (not= variable (:var term))
+                     (make-abstraction (:var term) (name->index variable (inc ind) (:body term)))
                      term)))
 
 (defn remove-names
@@ -70,11 +69,13 @@
                     (remove-names (:func term) context level)
                     (remove-names (:arg term) context level))
      :abstraction (db-make-abstraction
-                    (remove-names (add-index (:var term) 0 (:body term))
+                    (remove-names (name->index (:var term) 0 (:body term))
                                   context
                                   (inc level))))))
 
-(defn index->name [ind variable term]
+(defn index->name
+  "Substitute ind with variable in term."
+  [ind variable term]
   (case (:type term)
     :variable (if (= ind (:index term))
                   (make-variable variable)

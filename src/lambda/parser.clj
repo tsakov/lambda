@@ -1,19 +1,17 @@
 (ns lambda.parser
-  (:require [lambda.terms :refer :all]))
+  (:require [clojure.core.match :refer [match]]
+            [lambda.terms :refer :all]))
 
 ;;; x -> variable
 ;;; (M N) -> application
 ;;; (lambda x M) -> abstraction
 (defn parse-term [input]
-  (cond
-    (string? input) (parse-term (read-string input))
-    (symbol? input) (make-variable input)
-    (list? input)
-      (let [[a b c] input]
-        (case (count input)
-          2 (make-application (parse-term a) (parse-term b))
-          3 (make-abstraction b (parse-term c))
-          nil))))
+  (if (string? input)
+      (parse-term (read-string input))
+      (match input
+        (x :guard symbol?) (make-variable x)
+        ([func arg] :seq) (make-application (parse-term func) (parse-term arg))
+        (['lambda (variable :guard symbol?) body] :seq) (make-abstraction variable (parse-term body)))))
 
 (defn stringify-term [term]
   (case (:type term)

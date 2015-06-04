@@ -4,16 +4,6 @@
             [lambda.de-bruijn :refer :all]
             [lambda.terms :refer :all]))
 
-(defn add-index-parse [variable ind term]
-  (->> term
-       parse-term
-       (add-index variable ind)
-       db-stringify-term))
-
-#_(deftest add-index-test
-  (testing "add-index"
-    (is (= "(0 (lambda y (1 y)))" (add-index-parse 'x 0 "(x (lambda y (x y)))")))))
-
 (defn remove-names-parse [term]
   (->> term
        parse-term
