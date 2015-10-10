@@ -1,7 +1,9 @@
 (ns lambda.constants
   (:require [clojure.core.strint :refer [<<]]))
 
+(def S "(lambda (x y z) (x z (y z)))")
 (def K "(lambda x (lambda y x))")
+(def K* "(lambda (x y) y)")
 (def I "(lambda x x)")
 (def w "(lambda x (x x))")
 (def Omega (<< "(~{w} ~{w})"))

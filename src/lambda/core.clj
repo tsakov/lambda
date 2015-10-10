@@ -1,7 +1,19 @@
 (ns lambda.core
-  (:gen-class))
+  (:gen-class)
+  (:require [lambda.parser :refer :all]
+            [lambda.beta-reduce :refer :all])
+  (:import jline.console.ConsoleReader))
+
+(def prompt "=> ")
 
 (defn -main
-  "I don't do a whole lot ... yet."
+  "Start the lambda REPL."
   [& args]
-  (println "Hello, World!"))
+  (println "lambda 0.1.0")
+  (let [cr (ConsoleReader.)]
+    (while true
+      (-> (.readLine cr prompt)
+          parse-term
+          normalize
+          stringify-term
+          println))))

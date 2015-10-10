@@ -36,7 +36,16 @@
                'y
                (make-application
                  (make-variable 'x)
-                 (make-variable 'y))))))))
+                 (make-variable 'y)))))))
+  (testing "parse-term multiple arguments"
+    (is (= (parse-term "(x y z t)")
+           (parse-term "(((x y) z) t)")))
+    (is (= (parse-term "(lambda (x y z) (y z x))")
+           (parse-term "(lambda x (lambda y (lambda z ((y z) x))))")))
+    (is (= (parse-term "4")
+           (parse-term "(lambda f (lambda x (f (f (f (f x))))))")))
+    (is (= (parse-term "True")
+           (parse-term "(lambda x (lambda y x))")))))
 
 (deftest stringify-term-test
   (testing "stringify-term"
