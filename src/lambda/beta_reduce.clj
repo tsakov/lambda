@@ -1,5 +1,6 @@
 (ns lambda.beta-reduce
   (:require [lambda.terms :refer :all]
+            [lambda.parser :refer :all]
             [lambda.subs :refer :all]))
 
 (defn redex? [term]
@@ -37,12 +38,17 @@
                    (:var term)
                    (left-beta-reduce (:body term)))))
 
-(defn normalize [term]
-  (case (:type term)
-    :variable term
-    :application (if (normal-form? term)
-                     term
-                     (normalize (left-beta-reduce term)))
-    :abstraction (make-abstraction
-                   (:var term)
-                   (normalize (:body term)))))
+(defn normalize
+  ([term]
+    (normalize term left-beta-reduce))
+  ([term reducer]
+    (if (normal-form? term)
+        term
+        (normalize (reducer term) reducer))))
+
+(defn normalize-trace [term]
+  (normalize term
+             (fn [term]
+               (print-term term)
+               (println)
+               (left-beta-reduce term))))
